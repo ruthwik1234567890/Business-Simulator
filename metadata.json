@@ -1,0 +1,6 @@
+{
+  "name": "Wall Street Tycoon",
+  "description": "Build a business and financial empire with live stock & crypto markets, enterprises, real estate, and offline earnings.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
