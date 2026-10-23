@@ -25,6 +25,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.model.ClickBooster
@@ -54,7 +55,7 @@ fun EarningsScreen(
     var textCounter by remember { mutableLongStateOf(0L) }
 
     val scaleAnim by animateFloatAsState(
-        targetValue = if (isPressed) 0.91f else 1.0f,
+        targetValue = if (isPressed) 0.90f else 1.0f,
         animationSpec = spring(
             dampingRatio = Spring.DampingRatioMediumBouncy,
             stiffness = Spring.StiffnessLow
@@ -66,18 +67,18 @@ fun EarningsScreen(
         onManualClick()
         isPressed = true
         coroutineScope.launch {
-            delay(90)
+            delay(85)
             isPressed = false
         }
 
         val currentPerClick = uiState.currentPerClickAmount * uiState.tapMultiplier
         val id = ++textCounter
-        val xOffset = (-40..40).random().toFloat()
+        val xOffset = (-45..45).random().toFloat()
         val formattedGain = "+${Formatters.formatExactCurrency(currentPerClick)}"
         floatingTexts.add(FloatingText(id, formattedGain, xOffset))
 
         coroutineScope.launch {
-            delay(900)
+            delay(850)
             floatingTexts.removeAll { it.id == id }
         }
     }
@@ -87,7 +88,7 @@ fun EarningsScreen(
             .fillMaxSize()
             .background(SoftDarkBg)
             .padding(horizontal = 14.dp),
-        contentPadding = PaddingValues(top = 10.dp, bottom = 28.dp),
+        contentPadding = PaddingValues(top = 8.dp, bottom = 28.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
         // SECTION 1: EXCLUSIVE ACTIVE CASH DISPLAY
@@ -96,14 +97,14 @@ fun EarningsScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(18.dp))
-                    .border(1.5.dp, BrightGold.copy(alpha = 0.6f), RoundedCornerShape(18.dp)),
+                    .border(1.5.dp, BrightGold.copy(alpha = 0.5f), RoundedCornerShape(18.dp)),
                 color = SoftCardBg,
                 tonalElevation = 4.dp
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(18.dp),
+                        .padding(16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Row(
@@ -112,41 +113,41 @@ fun EarningsScreen(
                     ) {
                         Box(
                             modifier = Modifier
-                                .size(9.dp)
+                                .size(8.dp)
                                 .clip(CircleShape)
                                 .background(BrightGold)
                         )
                         Text(
                             text = "MY POCKET CASH",
                             color = BrightGold,
-                            fontSize = 12.sp,
+                            fontSize = 11.sp,
                             fontWeight = FontWeight.ExtraBold,
                             fontFamily = DisplayFontFamily,
                             letterSpacing = 0.5.sp
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(6.dp))
+                    Spacer(modifier = Modifier.height(4.dp))
 
                     Text(
                         text = Formatters.formatExactCurrency(uiState.cash),
                         color = BrightGoldLight,
-                        fontSize = 34.sp,
+                        fontSize = 32.sp,
                         fontWeight = FontWeight.Black,
                         fontFamily = DisplayFontFamily,
                         modifier = Modifier.testTag("active_cash_display")
                     )
 
                     Text(
-                        text = "Your spendable cash (used for shops & upgrades)",
+                        text = "Spendable cash available for business expansions & investments",
                         color = TextMutedSoft,
                         fontSize = 11.sp,
                         fontFamily = AppFontFamily
                     )
 
-                    Spacer(modifier = Modifier.height(14.dp))
-                    HorizontalDivider(color = SoftBorder, thickness = 1.dp)
                     Spacer(modifier = Modifier.height(12.dp))
+                    HorizontalDivider(color = SoftBorder, thickness = 1.dp)
+                    Spacer(modifier = Modifier.height(10.dp))
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -156,13 +157,13 @@ fun EarningsScreen(
                             Text(
                                 text = "Per Tap",
                                 color = TextMutedSoft,
-                                fontSize = 11.sp,
+                                fontSize = 10.sp,
                                 fontFamily = AppFontFamily
                             )
                             Text(
                                 text = "+${Formatters.formatExactCurrency(uiState.currentPerClickAmount)}",
                                 color = VibrantGreenLight,
-                                fontSize = 15.sp,
+                                fontSize = 14.sp,
                                 fontFamily = DisplayFontFamily,
                                 fontWeight = FontWeight.Bold
                             )
@@ -172,13 +173,13 @@ fun EarningsScreen(
                             Text(
                                 text = "Tap Level",
                                 color = TextMutedSoft,
-                                fontSize = 11.sp,
+                                fontSize = 10.sp,
                                 fontFamily = AppFontFamily
                             )
                             Text(
                                 text = "Level ${uiState.currentClickTier}",
                                 color = BrightGoldLight,
-                                fontSize = 15.sp,
+                                fontSize = 14.sp,
                                 fontFamily = DisplayFontFamily,
                                 fontWeight = FontWeight.Bold
                             )
@@ -186,15 +187,15 @@ fun EarningsScreen(
 
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(
-                                text = "Tap Streak",
+                                text = "Tap Multiplier",
                                 color = TextMutedSoft,
-                                fontSize = 11.sp,
+                                fontSize = 10.sp,
                                 fontFamily = AppFontFamily
                             )
                             Text(
-                                text = "${uiState.tapMultiplier}x",
+                                text = "${uiState.tapMultiplier.toInt()}x",
                                 color = if (uiState.tapMultiplier > 1.0) VividCoral else VibrantGreenLight,
-                                fontSize = 15.sp,
+                                fontSize = 14.sp,
                                 fontFamily = DisplayFontFamily,
                                 fontWeight = FontWeight.Bold
                             )
@@ -209,7 +210,7 @@ fun EarningsScreen(
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(240.dp)
+                    .height(230.dp)
                     .clip(RoundedCornerShape(22.dp))
                     .border(
                         2.dp,
@@ -232,7 +233,7 @@ fun EarningsScreen(
                         .background(
                             Brush.radialGradient(
                                 colors = listOf(
-                                    if (uiState.tapCombo > 0) VividCoral.copy(alpha = 0.25f) else BrightGold.copy(alpha = 0.18f),
+                                    if (uiState.tapCombo > 0) VividCoral.copy(alpha = 0.22f) else BrightGold.copy(alpha = 0.16f),
                                     SoftCardElevated
                                 )
                             )
@@ -243,33 +244,33 @@ fun EarningsScreen(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
                     ) {
-                        // Glowing tactile gold coin button
+                        // Glowing tactile gold coin / vault button
                         Box(
                             modifier = Modifier
-                                .size(100.dp)
+                                .size(96.dp)
                                 .clip(CircleShape)
                                 .background(
                                     Brush.verticalGradient(
-                                        colors = listOf(BrightGoldLight, BrightGold, Color(0xFFF59E0B))
+                                        colors = listOf(BrightGoldLight, BrightGold, Color(0xFFD97706))
                                     )
                                 )
-                                .border(4.dp, Color(0xFFFFFBEB), CircleShape),
+                                .border(3.5.dp, Color(0xFFFEF3C7), CircleShape),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
                                 imageVector = Icons.Default.AttachMoney,
                                 contentDescription = "Tap to Earn Cash",
                                 tint = Color(0xFF451A03),
-                                modifier = Modifier.size(58.dp)
+                                modifier = Modifier.size(54.dp)
                             )
                         }
 
-                        Spacer(modifier = Modifier.height(14.dp))
+                        Spacer(modifier = Modifier.height(12.dp))
 
                         Text(
                             text = "Tap to Make Money!",
                             color = BrightGoldLight,
-                            fontSize = 18.sp,
+                            fontSize = 17.sp,
                             fontWeight = FontWeight.ExtraBold,
                             fontFamily = DisplayFontFamily
                         )
@@ -277,7 +278,7 @@ fun EarningsScreen(
                         Text(
                             text = "+${Formatters.formatExactCurrency(uiState.currentPerClickAmount * uiState.tapMultiplier)} per tap",
                             color = TextPureWhite,
-                            fontSize = 13.sp,
+                            fontSize = 12.sp,
                             fontWeight = FontWeight.SemiBold,
                             fontFamily = AppFontFamily
                         )
@@ -285,19 +286,18 @@ fun EarningsScreen(
                         Spacer(modifier = Modifier.height(6.dp))
 
                         if (uiState.tapCombo > 0) {
-                            Box(
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .background(VividCoral.copy(alpha = 0.2f))
-                                    .border(1.dp, VividCoral, RoundedCornerShape(12.dp))
-                                    .padding(horizontal = 10.dp, vertical = 3.dp)
+                            Surface(
+                                shape = RoundedCornerShape(12.dp),
+                                color = VividCoral.copy(alpha = 0.2f),
+                                border = BorderStroke(1.dp, VividCoral)
                             ) {
                                 Text(
                                     text = "🔥 Streak: ${uiState.tapCombo} Taps (${uiState.tapMultiplier.toInt()}x Bonus!)",
                                     color = VividCoral,
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.Bold,
-                                    fontFamily = AppFontFamily
+                                    fontFamily = AppFontFamily,
+                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 3.dp)
                                 )
                             }
                         } else {
@@ -310,14 +310,14 @@ fun EarningsScreen(
                         }
                     }
 
-                    // Smooth floating text tags popping from taps
+                    // Floating text particles popping from taps
                     floatingTexts.forEach { ft ->
                         val floatTransition = rememberInfiniteTransition(label = "floatAnim")
                         val yOffsetAnim by floatTransition.animateFloat(
                             initialValue = 0f,
-                            targetValue = -95f,
+                            targetValue = -90f,
                             animationSpec = infiniteRepeatable(
-                                animation = tween(durationMillis = 900, easing = LinearEasing),
+                                animation = tween(durationMillis = 850, easing = LinearEasing),
                                 repeatMode = RepeatMode.Restart
                             ),
                             label = "yOffset"
@@ -327,7 +327,7 @@ fun EarningsScreen(
                             Text(
                                 text = ft.text,
                                 color = BrightGoldLight,
-                                fontSize = 18.sp,
+                                fontSize = 17.sp,
                                 fontWeight = FontWeight.ExtraBold,
                                 fontFamily = DisplayFontFamily
                             )
@@ -348,7 +348,7 @@ fun EarningsScreen(
                     fontFamily = DisplayFontFamily
                 )
                 Text(
-                    text = "Upgrade your tap power to earn cash way faster!",
+                    text = "Upgrade your tap equipment to maximize click yields",
                     color = TextMutedSoft,
                     fontSize = 12.sp,
                     fontFamily = AppFontFamily
@@ -356,7 +356,7 @@ fun EarningsScreen(
             }
         }
 
-        items(ClickBoosterCatalog.ALL_BOOSTERS) { booster ->
+        items(ClickBoosterCatalog.ALL_BOOSTERS, key = { it.tier }) { booster ->
             BoosterTierCard(
                 booster = booster,
                 currentTier = uiState.currentClickTier,
@@ -417,6 +417,7 @@ private fun BoosterTierCard(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            // Icon
             Box(
                 modifier = Modifier
                     .size(46.dp)
@@ -433,6 +434,7 @@ private fun BoosterTierCard(
                 )
             }
 
+            // Middle Column with clean horizontal layout (NO vertical wrapping!)
             Column(modifier = Modifier.weight(1f)) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -443,22 +445,26 @@ private fun BoosterTierCard(
                         color = if (isOwned) BrightGoldLight else TextPureWhite,
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Bold,
-                        fontFamily = DisplayFontFamily
+                        fontFamily = DisplayFontFamily,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f, fill = false)
                     )
+
                     if (isCurrentActive) {
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(6.dp))
-                                .background(VibrantGreen.copy(alpha = 0.2f))
-                                .border(1.dp, VibrantGreenLight, RoundedCornerShape(6.dp))
-                                .padding(horizontal = 5.dp, vertical = 1.dp)
+                        Surface(
+                            shape = RoundedCornerShape(4.dp),
+                            color = VibrantGreen.copy(alpha = 0.2f),
+                            border = BorderStroke(1.dp, VibrantGreenLight)
                         ) {
                             Text(
-                                "ACTIVE",
+                                text = "ACTIVE ✓",
                                 color = VibrantGreenLight,
                                 fontSize = 9.sp,
                                 fontWeight = FontWeight.ExtraBold,
-                                fontFamily = AppFontFamily
+                                fontFamily = AppFontFamily,
+                                maxLines = 1,
+                                modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp)
                             )
                         }
                     }
@@ -479,26 +485,32 @@ private fun BoosterTierCard(
                     color = TextMutedSoft,
                     fontSize = 11.sp,
                     fontFamily = AppFontFamily,
-                    maxLines = 2
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
 
+            // Action: Owned / Upgrade Button / Locked
             when {
                 isOwned -> {
-                    OutlinedButton(
-                        onClick = {},
-                        enabled = false,
-                        shape = RoundedCornerShape(10.dp),
-                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
-                        modifier = Modifier.height(34.dp)
+                    Surface(
+                        shape = RoundedCornerShape(8.dp),
+                        color = if (isCurrentActive) BrightGold.copy(alpha = 0.15f) else Color.Transparent,
+                        border = BorderStroke(1.dp, if (isCurrentActive) BrightGold.copy(alpha = 0.6f) else SoftBorder),
+                        modifier = Modifier.height(32.dp)
                     ) {
-                        Text(
-                            text = if (isCurrentActive) "Equipped" else "Owned",
-                            color = TextMutedSoft,
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold,
-                            fontFamily = AppFontFamily
-                        )
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier.padding(horizontal = 10.dp)
+                        ) {
+                            Text(
+                                text = if (isCurrentActive) "Equipped" else "Owned",
+                                color = if (isCurrentActive) BrightGoldLight else TextMutedSoft,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = AppFontFamily
+                            )
+                        }
                     }
                 }
                 isNextUp -> {
@@ -522,14 +534,18 @@ private fun BoosterTierCard(
                     }
                 }
                 else -> {
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(SoftDarkBg)
-                            .border(1.dp, SoftBorder, RoundedCornerShape(8.dp))
-                            .padding(horizontal = 8.dp, vertical = 6.dp)
+                    Surface(
+                        shape = RoundedCornerShape(8.dp),
+                        color = SoftDarkBg,
+                        border = BorderStroke(1.dp, SoftBorder),
+                        modifier = Modifier.height(30.dp)
                     ) {
-                        Text("Locked", color = TextSubtle, fontSize = 10.sp, fontWeight = FontWeight.Bold, fontFamily = AppFontFamily)
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier.padding(horizontal = 8.dp)
+                        ) {
+                            Text("Locked", color = TextSubtle, fontSize = 10.sp, fontWeight = FontWeight.Bold, fontFamily = AppFontFamily)
+                        }
                     }
                 }
             }

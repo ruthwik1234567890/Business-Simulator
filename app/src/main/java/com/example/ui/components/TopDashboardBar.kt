@@ -1,7 +1,8 @@
 package com.example.ui.components
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.BorderStroke
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -48,27 +49,29 @@ fun TopDashboardBar(
             .fillMaxWidth()
             .background(SoftDarkBg)
     ) {
-        // Hero Visual Banner with Soft Gradient Scrim
+        // Hero Visual Banner with Status Bar Safe Area Padding
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(130.dp)
+                .wrapContentHeight()
         ) {
+            // Background Hero Skyline Image
             Image(
                 painter = painterResource(id = R.drawable.img_tycoon_hero),
                 contentDescription = "Money Empire",
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .matchParentSize(),
                 contentScale = ContentScale.Crop
             )
 
-            // Soft modern gradient scrim
+            // Deep luxury gradient scrim
             Box(
                 modifier = Modifier
-                    .fillMaxSize()
+                    .matchParentSize()
                     .background(
                         Brush.verticalGradient(
                             colors = listOf(
-                                Color(0xFF0F172A).copy(alpha = 0.55f),
+                                Color(0xFF070B14).copy(alpha = 0.85f),
                                 Color(0xFF0F172A).copy(alpha = 0.88f),
                                 SoftDarkBg
                             )
@@ -76,14 +79,15 @@ fun TopDashboardBar(
                     )
             )
 
-            // Content inside hero header
+            // Content inside hero header, respecting statusBars insets
             Column(
                 modifier = Modifier
-                    .fillMaxSize()
+                    .fillMaxWidth()
+                    .statusBarsPadding()
                     .padding(horizontal = 14.dp, vertical = 8.dp),
-                verticalArrangement = Arrangement.SpaceBetween
+                verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                // Top Row: Title, Bonus pill, and Quick Actions
+                // Top Row: Brand & Quick Action Buttons
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -93,34 +97,37 @@ fun TopDashboardBar(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .size(9.dp)
-                                .clip(CircleShape)
-                                .background(BrightGold)
-                        )
+                        Surface(
+                            shape = CircleShape,
+                            color = BrightGold,
+                            modifier = Modifier.size(20.dp)
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Text("$", color = Color(0xFF0F172A), fontSize = 11.sp, fontWeight = FontWeight.Black)
+                            }
+                        }
                         Text(
                             text = "MONEY TYCOON",
                             color = BrightGold,
-                            fontSize = 13.sp,
+                            fontSize = 14.sp,
                             fontWeight = FontWeight.ExtraBold,
                             fontFamily = DisplayFontFamily,
                             letterSpacing = 0.5.sp
                         )
                         if (uiState.angelShares > 0) {
-                            Box(
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .background(VividPurple.copy(alpha = 0.2f))
-                                    .border(1.dp, VividPurple.copy(alpha = 0.6f), RoundedCornerShape(8.dp))
-                                    .padding(horizontal = 6.dp, vertical = 2.dp)
+                            Surface(
+                                shape = RoundedCornerShape(6.dp),
+                                color = VividPurple.copy(alpha = 0.2f),
+                                border = androidx.compose.foundation.BorderStroke(1.dp, VividPurple.copy(alpha = 0.6f)),
+                                modifier = Modifier.padding(start = 2.dp)
                             ) {
                                 Text(
-                                    text = "+${uiState.angelShares * 2}% Bonus",
+                                    text = "+${uiState.angelShares * 2}%",
                                     color = VividPurple,
                                     fontSize = 9.sp,
                                     fontWeight = FontWeight.Bold,
-                                    fontFamily = AppFontFamily
+                                    fontFamily = AppFontFamily,
+                                    modifier = Modifier.padding(horizontal = 5.dp, vertical = 1.dp)
                                 )
                             }
                         }
@@ -130,34 +137,34 @@ fun TopDashboardBar(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
-                        // Helpers / Managers Shortcut
-                        FilledTonalButton(
+                        // Helpers / Managers Button
+                        Button(
                             onClick = onOpenManagers,
-                            colors = ButtonDefaults.filledTonalButtonColors(
+                            colors = ButtonDefaults.buttonColors(
                                 containerColor = SoftCardElevated,
                                 contentColor = BrightGold
                             ),
                             shape = RoundedCornerShape(8.dp),
-                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
-                            modifier = Modifier.height(28.dp).testTag("open_managers_button")
+                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+                            modifier = Modifier.height(30.dp).testTag("open_managers_button")
                         ) {
-                            Icon(Icons.Default.People, contentDescription = null, modifier = Modifier.size(13.dp))
+                            Icon(Icons.Default.People, contentDescription = null, modifier = Modifier.size(14.dp))
                             Spacer(modifier = Modifier.width(4.dp))
                             Text("Helpers", fontSize = 11.sp, fontWeight = FontWeight.Bold, fontFamily = AppFontFamily)
                         }
 
-                        // Super Level Up / IPO Shortcut
-                        FilledTonalButton(
+                        // Super Level Up / IPO Button
+                        Button(
                             onClick = onOpenAscension,
-                            colors = ButtonDefaults.filledTonalButtonColors(
+                            colors = ButtonDefaults.buttonColors(
                                 containerColor = if (uiState.canAscend) VibrantGreen else SoftCardElevated,
                                 contentColor = if (uiState.canAscend) Color(0xFF064E3B) else TextMutedSoft
                             ),
                             shape = RoundedCornerShape(8.dp),
-                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
-                            modifier = Modifier.height(28.dp).testTag("open_ascension_button")
+                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+                            modifier = Modifier.height(30.dp).testTag("open_ascension_button")
                         ) {
-                            Icon(Icons.Default.RocketLaunch, contentDescription = null, modifier = Modifier.size(12.dp))
+                            Icon(Icons.Default.RocketLaunch, contentDescription = null, modifier = Modifier.size(13.dp))
                             Spacer(modifier = Modifier.width(3.dp))
                             Text("Level Up", fontSize = 11.sp, fontWeight = FontWeight.Bold, fontFamily = AppFontFamily)
                         }
@@ -165,7 +172,7 @@ fun TopDashboardBar(
                         // Reset Button
                         IconButton(
                             onClick = { showResetDialog = true },
-                            modifier = Modifier.size(28.dp).testTag("reset_game_icon_button")
+                            modifier = Modifier.size(30.dp).testTag("reset_game_icon_button")
                         ) {
                             Icon(
                                 Icons.Default.RestartAlt,
@@ -177,52 +184,63 @@ fun TopDashboardBar(
                     }
                 }
 
-                // Rank Badge & Goals Shortcut
+                // Rank Ribbon & Goals Link
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(SoftCardElevated)
-                            .border(1.dp, BrightGold.copy(alpha = 0.4f), RoundedCornerShape(8.dp))
-                            .padding(horizontal = 8.dp, vertical = 3.dp)
+                    Surface(
+                        color = Color(0xFF1E293B).copy(alpha = 0.9f),
+                        shape = RoundedCornerShape(10.dp),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, BrightGold.copy(alpha = 0.4f))
                     ) {
-                        Text(
-                            text = "Level: ${uiState.playerRank.title}",
-                            color = BrightGoldLight,
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold,
-                            fontFamily = AppFontFamily
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+                        ) {
+                            Text("🎖️", fontSize = 10.sp)
+                            Text(
+                                text = "Rank: ${uiState.playerRank.title}",
+                                color = BrightGoldLight,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = AppFontFamily
+                            )
+                        }
                     }
 
-                    TextButton(
-                        onClick = onOpenMilestones,
-                        contentPadding = PaddingValues(horizontal = 6.dp, vertical = 0.dp),
-                        modifier = Modifier.height(24.dp)
+                    Surface(
+                        color = VividBlue.copy(alpha = 0.12f),
+                        shape = RoundedCornerShape(10.dp),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, VividBlue.copy(alpha = 0.35f)),
+                        modifier = Modifier.clickable { onOpenMilestones() }
                     ) {
-                        Icon(Icons.Default.Stars, contentDescription = null, tint = VividBlue, modifier = Modifier.size(14.dp))
-                        Spacer(modifier = Modifier.width(3.dp))
-                        Text(
-                            text = "Goals & Bonuses >",
-                            color = VividBlue,
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold,
-                            fontFamily = AppFontFamily
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+                        ) {
+                            Icon(Icons.Default.Stars, contentDescription = null, tint = VividBlue, modifier = Modifier.size(13.dp))
+                            Text(
+                                text = "Goals & Bonuses ›",
+                                color = VividBlue,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = AppFontFamily
+                            )
+                        }
                     }
                 }
             }
         }
 
-        // Main Dashboard Metrics Area: Total Wealth & Idle Income (Active cash is in Tap Cash tab)
+        // Financial Cockpit Metrics: Total Wealth & Idle Income
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 14.dp, vertical = 8.dp)
+                .padding(horizontal = 14.dp, vertical = 4.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -289,7 +307,7 @@ fun TopDashboardBar(
                         ) {
                             Box(
                                 modifier = Modifier
-                                    .size(6.dp)
+                                    .size(7.dp)
                                     .clip(CircleShape)
                                     .background(if (uiState.totalHourlyPassiveIncome > 0) VibrantGreenLight else TextSubtle)
                             )
@@ -307,11 +325,15 @@ fun TopDashboardBar(
             }
 
             // Wealth Detailed Breakdown Accordion
-            AnimatedVisibility(visible = showNetWorthBreakdown) {
+            AnimatedVisibility(
+                visible = showNetWorthBreakdown,
+                enter = expandVertically(),
+                exit = shrinkVertically()
+            ) {
                 Surface(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 10.dp)
+                        .padding(top = 8.dp)
                         .clip(RoundedCornerShape(14.dp))
                         .border(1.dp, SoftBorderHighlight, RoundedCornerShape(14.dp)),
                     color = SoftCardElevated,
@@ -322,18 +344,19 @@ fun TopDashboardBar(
                         verticalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
                         Text(
-                            text = "MY TOTAL WEALTH BREAKDOWN",
+                            text = "TOTAL WEALTH BREAKDOWN",
                             color = BrightGold,
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
                             fontFamily = DisplayFontFamily
                         )
                         HorizontalDivider(color = SoftBorder, thickness = 1.dp)
-                        BreakdownRow("Cash in Hand & Bank", uiState.cash + uiState.bankDepositedCash)
-                        BreakdownRow("Businesses Value", uiState.enterprisesValuation)
+                        BreakdownRow("Spendable Pocket Cash", uiState.cash)
+                        BreakdownRow("Bank Vault Deposit", uiState.bankDepositedCash)
+                        BreakdownRow("Businesses Valuation", uiState.enterprisesValuation)
                         BreakdownRow("Stocks & Crypto", uiState.stocksValuation)
-                        BreakdownRow("Houses & Properties", uiState.realEstateValuation)
-                        BreakdownRow("Rewards & Luxury Items", uiState.luxuryValuation)
+                        BreakdownRow("Real Estate Properties", uiState.realEstateValuation)
+                        BreakdownRow("Personal Collectibles", uiState.collectiblesValuation)
                     }
                 }
             }
@@ -355,7 +378,7 @@ fun TopDashboardBar(
             },
             text = {
                 Text(
-                    text = "This will wipe all your businesses, houses, and money back to absolute scratch ($0.00 cash, 0 assets, Tier 1 $0.50/click).",
+                    text = "This will reset all your businesses, properties, and cash back to $0.00.",
                     color = TextMutedSoft,
                     fontFamily = AppFontFamily,
                     fontSize = 13.sp

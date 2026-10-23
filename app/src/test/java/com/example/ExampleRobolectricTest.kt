@@ -2,11 +2,10 @@ package com.example
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
-import com.example.model.ClickBoosterCatalog
-import com.example.model.EnterpriseCatalog
-import com.example.model.PlayerRank
+import com.example.model.*
 import com.example.util.Formatters
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -51,31 +50,50 @@ class ExampleRobolectricTest {
   }
 
   @Test
-  fun `milestone multipliers boost income exponentially`() {
-    val coffee = EnterpriseCatalog.COFFEE_SHOP
-    assertEquals(2.0, coffee.getMilestoneMultiplier(10), 0.01)
-    assertEquals(4.0, coffee.getMilestoneMultiplier(25), 0.01)
+  fun `forbes 250 catalog contains exactly 250 billionaires with parody names`() {
+    val list = ForbesRichListCatalog.billionaires
+    assertEquals(250, list.size)
+    assertEquals(1, list.first().rank)
+    assertEquals(250, list.last().rank)
+
+    // Check specific parody names
+    val topNames = list.take(15).map { it.name }
+    assertTrue(topNames.contains("Felon Musk"))
+    assertTrue(topNames.contains("Bernard Amount"))
+    assertTrue(topNames.contains("Geoff Bezos"))
+    assertTrue(topNames.contains("Mark Suckerberg"))
+    assertTrue(topNames.contains("Larry Elephant"))
+    assertTrue(topNames.contains("Warren Bucket"))
+    assertTrue(topNames.contains("Gill Bates"))
+    assertTrue(topNames.contains("Jensen Leather Jacket"))
+
+    // Verify descending order
+    for (i in 0 until list.size - 1) {
+      assertTrue(list[i].netWorth >= list[i + 1].netWorth)
+    }
   }
 
   @Test
-  fun `bulk buy calculates multiple levels correctly`() {
-    val coffee = EnterpriseCatalog.COFFEE_SHOP
-    val singleCost = coffee.getUpgradeCost(0)
-    val bulkCost = coffee.getCostForLevels(0, 3)
-    assertTrue(bulkCost > singleCost)
+  fun `ultimate collectibles catalog covers all four mandatory categories`() {
+    val configs = UltimateCollectiblesCatalog.allConfigs
+    val categories = configs.map { it.category }.toSet()
+    assertTrue(categories.contains(CollectibleCategory.MANSIONS))
+    assertTrue(categories.contains(CollectibleCategory.PRECIOUS_ASSETS))
+    assertTrue(categories.contains(CollectibleCategory.VEHICLES))
+    assertTrue(categories.contains(CollectibleCategory.RARITIES))
+
+    val mansion = configs.find { it.id == "mansion_beverly_hills" }
+    assertNotNull(mansion)
+    assertEquals(45_000_000.0, mansion!!.cost, 0.01)
   }
 
   @Test
-  fun `click booster catalog starts at 50 cents and scales properly`() {
-    val tier1 = ClickBoosterCatalog.getBoosterForTier(1)
-    assertEquals(0.50, tier1.perClickAmount, 0.001)
-    assertEquals(0.0, tier1.cost, 0.001)
-
-    val tier2 = ClickBoosterCatalog.getBoosterForTier(2)
-    assertEquals(1.50, tier2.perClickAmount, 0.001)
-    assertEquals(25.0, tier2.cost, 0.001)
-
-    val next = ClickBoosterCatalog.getNextBooster(1)
-    assertEquals(2, next?.tier)
+  fun `tax status state computes 2 point 5 percent tax correctly`() {
+    val state = TaxStatusState(
+      rollingWindowSeconds = 900,
+      accumulatedTaxableIncome = 100_000.0,
+      isWarningActive = true
+    )
+    assertEquals(2500.0, state.currentTaxDue, 0.01)
   }
 }

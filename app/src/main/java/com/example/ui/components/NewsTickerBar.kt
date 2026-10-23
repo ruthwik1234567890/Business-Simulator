@@ -1,11 +1,14 @@
 package com.example.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Campaign
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -30,45 +33,63 @@ fun NewsTickerBar(
     val badgeText = if (currentEvent.isBullish) VibrantGreenLight else VividCoral
     val headline = currentEvent.headline
 
-    Row(
+    Surface(
+        color = Color(0xFF131B2E),
+        shape = RoundedCornerShape(10.dp),
+        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF1E293B)),
         modifier = modifier
             .fillMaxWidth()
-            .background(SoftCardBg)
-            .padding(horizontal = 14.dp, vertical = 7.dp)
-            .testTag("news_ticker_bar"),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+            .padding(horizontal = 14.dp, vertical = 4.dp)
+            .testTag("news_ticker_bar")
     ) {
-        Box(
+        Row(
             modifier = Modifier
-                .clip(RoundedCornerShape(6.dp))
-                .background(badgeBg)
-                .padding(horizontal = 6.dp, vertical = 2.dp)
+                .fillMaxWidth()
+                .padding(horizontal = 10.dp, vertical = 6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
+            Surface(
+                color = badgeBg,
+                shape = RoundedCornerShape(6.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(5.dp)
+                            .clip(CircleShape)
+                            .background(badgeText)
+                    )
+                    Text(
+                        text = currentEvent.category.uppercase(),
+                        color = badgeText,
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        fontFamily = DisplayFontFamily
+                    )
+                }
+            }
+
+            Icon(
+                imageVector = Icons.Default.Campaign,
+                contentDescription = "News",
+                tint = BrightGold,
+                modifier = Modifier.size(15.dp)
+            )
+
             Text(
-                text = currentEvent.category,
-                color = badgeText,
-                fontSize = 10.sp,
-                fontWeight = FontWeight.ExtraBold,
-                fontFamily = AppFontFamily
+                text = headline,
+                color = TextPureWhite,
+                fontSize = 11.sp,
+                fontFamily = AppFontFamily,
+                fontWeight = FontWeight.Medium,
+                maxLines = 1,
+                modifier = Modifier.weight(1f)
             )
         }
-
-        Icon(
-            imageVector = Icons.Default.Campaign,
-            contentDescription = "News",
-            tint = BrightGold,
-            modifier = Modifier.size(16.dp)
-        )
-
-        Text(
-            text = headline,
-            color = TextPureWhite,
-            fontSize = 11.sp,
-            fontFamily = AppFontFamily,
-            fontWeight = FontWeight.Medium,
-            maxLines = 1,
-            modifier = Modifier.weight(1f)
-        )
     }
 }
