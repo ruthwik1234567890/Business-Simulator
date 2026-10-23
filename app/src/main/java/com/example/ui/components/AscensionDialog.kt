@@ -58,7 +58,7 @@ fun AscensionDialog(
                 }
                 if (!canAscend) {
                     Text(
-                        text = "You need at least $1,000,000 Total Wealth to Level Up.",
+                        text = "You need at least $1,000,000 Total Money to Level Up.",
                         color = VividCoral,
                         fontSize = 11.sp,
                         fontFamily = AppFontFamily,

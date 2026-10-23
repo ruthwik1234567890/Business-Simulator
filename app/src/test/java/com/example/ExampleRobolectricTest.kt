@@ -32,6 +32,15 @@ class ExampleRobolectricTest {
   }
 
   @Test
+  fun `formatPerTap formats exact numbers cleanly per tap`() {
+    assertEquals("$25 per tap", Formatters.formatPerTap(25.0))
+    assertEquals("$18 per tap", Formatters.formatPerTap(18.0))
+    assertEquals("$1.50 per tap", Formatters.formatPerTap(1.50))
+    assertEquals("$0.50 per tap", Formatters.formatPerTap(0.50))
+    assertEquals("$1,800 per tap", Formatters.formatPerTap(1800.0))
+  }
+
+  @Test
   fun `enterprise cost scaling operates correctly`() {
     val coffee = EnterpriseCatalog.COFFEE_SHOP
     assertEquals(1000.0, coffee.getUpgradeCost(0), 0.01)

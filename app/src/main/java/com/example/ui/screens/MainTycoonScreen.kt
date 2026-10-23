@@ -50,7 +50,8 @@ fun MainTycoonScreen(
                         onOpenBankVault = { viewModel.openBankVaultDialog() },
                         onOpenManagers = { viewModel.openManagersSheet() },
                         onOpenAscension = { viewModel.openAscensionDialog() },
-                        onOpenMilestones = { viewModel.openMilestonesDialog() }
+                        onOpenMilestones = { viewModel.openMilestonesDialog() },
+                        onNavigateToPocket = { viewModel.selectTab(TycoonTab.EARNINGS) }
                     )
                     NewsTickerBar(currentEvent = uiState.currentNewsEvent)
                     // Sticky Tax Warning Banner at minute 15 with 5-minute countdown and one-tap Pay Tax CTA

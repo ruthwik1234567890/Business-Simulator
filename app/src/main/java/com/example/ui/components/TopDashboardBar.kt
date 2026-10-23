@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -39,10 +40,10 @@ fun TopDashboardBar(
     onOpenManagers: () -> Unit,
     onOpenAscension: () -> Unit,
     onOpenMilestones: () -> Unit,
+    onNavigateToPocket: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     var showResetDialog by remember { mutableStateOf(false) }
-    var showNetWorthBreakdown by remember { mutableStateOf(false) }
 
     Column(
         modifier = modifier
@@ -236,7 +237,7 @@ fun TopDashboardBar(
             }
         }
 
-        // Financial Cockpit Metrics: Total Wealth & Idle Income
+        // Financial Cockpit Metrics: Total Money & Idle Income
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -246,13 +247,14 @@ fun TopDashboardBar(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                // Total Wealth Card (Net Worth)
+                // Total Money Card (Pocket Cash) - Redirects directly to pocket cash screen
                 Surface(
                     modifier = Modifier
                         .weight(1f)
                         .clip(RoundedCornerShape(14.dp))
                         .border(1.dp, SoftBorder, RoundedCornerShape(14.dp))
-                        .clickable { showNetWorthBreakdown = !showNetWorthBreakdown },
+                        .clickable { onNavigateToPocket() }
+                        .testTag("total_money_card"),
                     color = SoftCardBg,
                     tonalElevation = 2.dp
                 ) {
@@ -263,22 +265,27 @@ fun TopDashboardBar(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "TOTAL WEALTH",
+                                text = "TOTAL MONEY",
                                 color = TextMutedSoft,
                                 fontSize = 10.sp,
                                 fontFamily = AppFontFamily,
                                 fontWeight = FontWeight.Bold
                             )
-                            Icon(Icons.Default.Info, contentDescription = "View Details", tint = TextMutedSoft, modifier = Modifier.size(12.dp))
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                                contentDescription = "View Pocket Cash",
+                                tint = BrightGold,
+                                modifier = Modifier.size(12.dp)
+                            )
                         }
                         Spacer(modifier = Modifier.height(2.dp))
                         Text(
-                            text = Formatters.formatCurrency(uiState.totalNetWorth),
-                            color = TextPureWhite,
+                            text = Formatters.formatCurrency(uiState.cash),
+                            color = BrightGoldLight,
                             fontSize = 18.sp,
                             fontWeight = FontWeight.ExtraBold,
                             fontFamily = DisplayFontFamily,
-                            modifier = Modifier.testTag("net_worth_display")
+                            modifier = Modifier.testTag("total_money_display")
                         )
                     }
                 }
@@ -320,43 +327,6 @@ fun TopDashboardBar(
                                 modifier = Modifier.testTag("passive_income_display")
                             )
                         }
-                    }
-                }
-            }
-
-            // Wealth Detailed Breakdown Accordion
-            AnimatedVisibility(
-                visible = showNetWorthBreakdown,
-                enter = expandVertically(),
-                exit = shrinkVertically()
-            ) {
-                Surface(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 8.dp)
-                        .clip(RoundedCornerShape(14.dp))
-                        .border(1.dp, SoftBorderHighlight, RoundedCornerShape(14.dp)),
-                    color = SoftCardElevated,
-                    tonalElevation = 4.dp
-                ) {
-                    Column(
-                        modifier = Modifier.padding(14.dp),
-                        verticalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        Text(
-                            text = "TOTAL WEALTH BREAKDOWN",
-                            color = BrightGold,
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold,
-                            fontFamily = DisplayFontFamily
-                        )
-                        HorizontalDivider(color = SoftBorder, thickness = 1.dp)
-                        BreakdownRow("Spendable Pocket Cash", uiState.cash)
-                        BreakdownRow("Bank Vault Deposit", uiState.bankDepositedCash)
-                        BreakdownRow("Businesses Valuation", uiState.enterprisesValuation)
-                        BreakdownRow("Stocks & Crypto", uiState.stocksValuation)
-                        BreakdownRow("Real Estate Properties", uiState.realEstateValuation)
-                        BreakdownRow("Personal Collectibles", uiState.collectiblesValuation)
                     }
                 }
             }
@@ -404,23 +374,6 @@ fun TopDashboardBar(
             containerColor = SoftCardBg,
             shape = RoundedCornerShape(18.dp),
             tonalElevation = 6.dp
-        )
-    }
-}
-
-@Composable
-private fun BreakdownRow(label: String, value: Double) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Text(label, color = TextMutedSoft, fontSize = 11.sp, fontFamily = AppFontFamily)
-        Text(
-            Formatters.formatCurrency(value),
-            color = TextPureWhite,
-            fontSize = 11.sp,
-            fontFamily = AppFontFamily,
-            fontWeight = FontWeight.Bold
         )
     }
 }

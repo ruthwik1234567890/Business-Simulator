@@ -12,6 +12,16 @@ object Formatters {
         return exactCurrencyFormat.format(amount)
     }
 
+    fun formatPerTap(amount: Double): String {
+        val formatted = when {
+            amount >= 1_000_000.0 -> formatCurrency(amount)
+            amount >= 1_000.0 -> integerFormat.format(amount)
+            amount % 1.0 == 0.0 -> "$${amount.toInt()}"
+            else -> exactCurrencyFormat.format(amount)
+        }
+        return "$formatted per tap"
+    }
+
     fun formatCurrency(amount: Double): String {
         val absVal = abs(amount)
         val prefix = if (amount < 0) "-$" else "$"

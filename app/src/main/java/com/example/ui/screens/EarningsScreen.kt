@@ -9,11 +9,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -22,14 +21,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.model.ClickBooster
-import com.example.model.ClickBoosterCatalog
 import com.example.ui.theme.*
 import com.example.util.Formatters
 import com.example.viewmodel.TycoonUiState
@@ -337,218 +332,179 @@ fun EarningsScreen(
             }
         }
 
-        // SECTION 3: CLICK BOOSTER STORE (TAP UPGRADES)
+        // SECTION 3: 1 THIN ROW SHOWING WEALTH PROGRESS & MULTIPLIER REWARD
         item {
-            Column(modifier = Modifier.padding(top = 4.dp)) {
-                Text(
-                    text = "Tap Upgrades",
-                    color = BrightGold,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    fontFamily = DisplayFontFamily
-                )
-                Text(
-                    text = "Upgrade your tap equipment to maximize click yields",
-                    color = TextMutedSoft,
-                    fontSize = 12.sp,
-                    fontFamily = AppFontFamily
-                )
-            }
-        }
-
-        items(ClickBoosterCatalog.ALL_BOOSTERS, key = { it.tier }) { booster ->
-            BoosterTierCard(
-                booster = booster,
-                currentTier = uiState.currentClickTier,
-                playerCash = uiState.cash,
-                onBuyBooster = { onBuyBooster(booster.tier) }
+            NextMultiplierRow(
+                uiState = uiState,
+                onBuyBooster = onBuyBooster
             )
         }
     }
 }
 
 @Composable
-private fun BoosterTierCard(
-    booster: ClickBooster,
-    currentTier: Int,
-    playerCash: Double,
-    onBuyBooster: () -> Unit
+private fun NextMultiplierRow(
+    uiState: TycoonUiState,
+    onBuyBooster: (Int) -> Unit
 ) {
-    val isOwned = booster.tier <= currentTier
-    val isCurrentActive = booster.tier == currentTier
-    val isNextUp = booster.tier == currentTier + 1
-    val canAfford = playerCash >= booster.cost && isNextUp
-
-    val borderColor = when {
-        isCurrentActive -> BrightGold
-        isNextUp && canAfford -> VibrantGreenLight
-        isNextUp -> SoftBorderHighlight
-        isOwned -> SoftBorder
-        else -> SoftBorder.copy(alpha = 0.5f)
+    val nextBooster = uiState.nextBooster
+    if (nextBooster == null) {
+        // Max Tier Reached
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(14.dp))
+                .border(1.dp, BrightGold.copy(alpha = 0.5f), RoundedCornerShape(14.dp))
+                .testTag("next_multiplier_row"),
+            color = SoftCardBg,
+            tonalElevation = 2.dp
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 14.dp, vertical = 10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text("👑", fontSize = 16.sp)
+                    Text(
+                        text = "Max Tap Boost Active (${Formatters.formatPerTap(uiState.currentBooster.perClickAmount)})",
+                        color = BrightGold,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = DisplayFontFamily
+                    )
+                }
+                Surface(
+                    shape = RoundedCornerShape(6.dp),
+                    color = BrightGold.copy(alpha = 0.2f)
+                ) {
+                    Text(
+                        text = "MAX LEVEL",
+                        color = BrightGoldLight,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                    )
+                }
+            }
+        }
+        return
     }
 
-    val iconVector: ImageVector = when (booster.iconName) {
-        "touch_app" -> Icons.Default.TouchApp
-        "point_of_sale" -> Icons.Default.PointOfSale
-        "credit_card" -> Icons.Default.CreditCard
-        "qr_code_scanner" -> Icons.Default.QrCodeScanner
-        "smart_toy" -> Icons.Default.SmartToy
-        "terminal" -> Icons.Default.Terminal
-        "speed" -> Icons.Default.Speed
-        "bolt" -> Icons.Default.Bolt
-        "account_balance" -> Icons.Default.AccountBalance
-        "language" -> Icons.Default.Language
-        else -> Icons.Default.AutoAwesome
-    }
+    val canAfford = uiState.cash >= nextBooster.cost
+    val progress = (uiState.totalNetWorth / nextBooster.cost).coerceIn(0.0, 1.0).toFloat()
 
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .border(1.dp, borderColor, RoundedCornerShape(16.dp))
-            .testTag("booster_tier_${booster.tier}"),
-        color = if (isCurrentActive) SoftCardElevated else SoftCardBg,
-        tonalElevation = if (isCurrentActive) 4.dp else 1.dp
+            .clip(RoundedCornerShape(14.dp))
+            .border(
+                1.dp,
+                if (canAfford) VibrantGreenLight.copy(alpha = 0.6f) else SoftBorder,
+                RoundedCornerShape(14.dp)
+            )
+            .testTag("next_multiplier_row"),
+        color = SoftCardBg,
+        tonalElevation = 2.dp
     ) {
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(14.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                .padding(horizontal = 14.dp, vertical = 10.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            // Icon
-            Box(
-                modifier = Modifier
-                    .size(46.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(if (isOwned) BrightGold.copy(alpha = 0.15f) else SoftCardElevated)
-                    .border(1.dp, if (isOwned) BrightGold.copy(alpha = 0.4f) else SoftBorder, RoundedCornerShape(12.dp)),
-                contentAlignment = Alignment.Center
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Icon(
-                    imageVector = iconVector,
-                    contentDescription = booster.name,
-                    tint = if (isOwned) BrightGoldLight else TextMutedSoft,
-                    modifier = Modifier.size(24.dp)
-                )
-            }
-
-            // Middle Column with clean horizontal layout (NO vertical wrapping!)
-            Column(modifier = Modifier.weight(1f)) {
+                // 1) {current wealth}/{wealth needed to access new multiplier}
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.weight(1f)
                 ) {
-                    Text(
-                        text = "Level ${booster.tier}: ${booster.name}",
-                        color = if (isOwned) BrightGoldLight else TextPureWhite,
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = DisplayFontFamily,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f, fill = false)
-                    )
-
-                    if (isCurrentActive) {
-                        Surface(
-                            shape = RoundedCornerShape(4.dp),
-                            color = VibrantGreen.copy(alpha = 0.2f),
-                            border = BorderStroke(1.dp, VibrantGreenLight)
+                    Text("⚡", fontSize = 16.sp)
+                    Column {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
                             Text(
-                                text = "ACTIVE ✓",
-                                color = VibrantGreenLight,
-                                fontSize = 9.sp,
-                                fontWeight = FontWeight.ExtraBold,
-                                fontFamily = AppFontFamily,
-                                maxLines = 1,
-                                modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp)
-                            )
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(2.dp))
-
-                Text(
-                    text = "Gives: +${Formatters.formatExactCurrency(booster.perClickAmount)} per tap",
-                    color = VibrantGreenLight,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    fontFamily = AppFontFamily
-                )
-
-                Text(
-                    text = booster.description,
-                    color = TextMutedSoft,
-                    fontSize = 11.sp,
-                    fontFamily = AppFontFamily,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-
-            // Action: Owned / Upgrade Button / Locked
-            when {
-                isOwned -> {
-                    Surface(
-                        shape = RoundedCornerShape(8.dp),
-                        color = if (isCurrentActive) BrightGold.copy(alpha = 0.15f) else Color.Transparent,
-                        border = BorderStroke(1.dp, if (isCurrentActive) BrightGold.copy(alpha = 0.6f) else SoftBorder),
-                        modifier = Modifier.height(32.dp)
-                    ) {
-                        Box(
-                            contentAlignment = Alignment.Center,
-                            modifier = Modifier.padding(horizontal = 10.dp)
-                        ) {
-                            Text(
-                                text = if (isCurrentActive) "Equipped" else "Owned",
-                                color = if (isCurrentActive) BrightGoldLight else TextMutedSoft,
+                                text = "Money:",
+                                color = TextMutedSoft,
                                 fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold,
                                 fontFamily = AppFontFamily
                             )
+                            Text(
+                                text = "${Formatters.formatCurrency(uiState.cash)} / ${Formatters.formatCurrency(nextBooster.cost)}",
+                                color = if (uiState.cash >= nextBooster.cost) VibrantGreenLight else BrightGoldLight,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = DisplayFontFamily
+                            )
                         }
                     }
                 }
-                isNextUp -> {
+
+                // 2) Exact rate per tap you get if you spend the required amount + Upgrade action
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Surface(
+                        shape = RoundedCornerShape(8.dp),
+                        color = Color(0xFF1E293B),
+                        border = BorderStroke(1.dp, BrightGold.copy(alpha = 0.4f))
+                    ) {
+                        Text(
+                            text = Formatters.formatPerTap(nextBooster.perClickAmount),
+                            color = BrightGold,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            fontFamily = DisplayFontFamily,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                        )
+                    }
+
                     Button(
-                        onClick = onBuyBooster,
+                        onClick = { onBuyBooster(nextBooster.tier) },
                         enabled = canAfford,
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = if (canAfford) VibrantGreen else SoftCardElevated,
-                            contentColor = if (canAfford) Color(0xFF064E3B) else TextMutedSoft,
+                            containerColor = VibrantGreen,
+                            contentColor = Color(0xFF064E3B),
                             disabledContainerColor = SoftCardElevated,
                             disabledContentColor = TextMutedSoft
                         ),
-                        shape = RoundedCornerShape(10.dp),
-                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
-                        modifier = Modifier.height(38.dp).testTag("buy_booster_tier_${booster.tier}")
-                    ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text("Upgrade", fontSize = 11.sp, fontWeight = FontWeight.Bold, fontFamily = AppFontFamily)
-                            Text(Formatters.formatCurrency(booster.cost), fontSize = 10.sp, fontWeight = FontWeight.ExtraBold, fontFamily = AppFontFamily)
-                        }
-                    }
-                }
-                else -> {
-                    Surface(
                         shape = RoundedCornerShape(8.dp),
-                        color = SoftDarkBg,
-                        border = BorderStroke(1.dp, SoftBorder),
-                        modifier = Modifier.height(30.dp)
+                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+                        modifier = Modifier.height(32.dp).testTag("buy_next_multiplier_button")
                     ) {
-                        Box(
-                            contentAlignment = Alignment.Center,
-                            modifier = Modifier.padding(horizontal = 8.dp)
-                        ) {
-                            Text("Locked", color = TextSubtle, fontSize = 10.sp, fontWeight = FontWeight.Bold, fontFamily = AppFontFamily)
-                        }
+                        Text(
+                            text = if (canAfford) "Unlock" else "Need ${Formatters.formatCurrency(nextBooster.cost)}",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = AppFontFamily
+                        )
                     }
                 }
             }
+
+            // Smooth progress indicator to visually track progression to required wealth
+            LinearProgressIndicator(
+                progress = { progress },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(3.dp)
+                    .clip(CircleShape),
+                color = if (canAfford) VibrantGreenLight else BrightGold,
+                trackColor = SoftBorder.copy(alpha = 0.4f)
+            )
         }
     }
 }
